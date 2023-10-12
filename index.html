@@ -25,7 +25,6 @@
             text-align: center;
             line-height: 160px;
         }
-        
         body > .el-container {
             margin-bottom: 40px;
         }
@@ -33,20 +32,32 @@
     </head>
     <body>
     <div id="app">
-        <el-header>Header</el-header>
+        <el-header>抽卡模擬</el-header>
         <el-container>
             <el-aside width="100px">Aside</el-aside>
             <el-container>
                 <el-main>
                     抽卡<br>
-                    <el-button @click="createRandom() ; visible = true">抽</el-button>
-                    <el-dialog :visible.sync="visible" title="結果">
-                        <p>{{randomNum}}</p>
-                        <div v-if='randomNum >=970'>四星</div>
-                        <div v-else-if='randomNum >=915'>三星</div>
-                        <div v-else>二星</div>
-                        <el-button @click="createRandom() ; visible = true">再抽</el-button>
+                    <el-button plain @click="openNotify">周杰倫失去了一切...</el-button>
+                    <el-button @click="GetOneCard() ; visible = true ; tenTries = false">抽</el-button>
+                    <el-button @click="GetTenCard() ; visible = true ; tenTries = true">十連抽</el-button>
+                    <el-dialog v-if='tenTries == false' :visible.sync="visible" title="結果">
+                        <el-main>
+                            <p>{{card}}</p>
+                            <p>{{judgeRarity(card)}}</p>
+                        </el-main>
+                        <el-button @click="GetOneCard() ; visible = true ; tenTries = false">再抽</el-button>
                     </el-dialog>
+                    <el-dialog v-if="tenTries == true" :visible.sync="visible" title="結果">
+                        <el-container>
+                            <el-main v-for='eachCard in TenCard'>
+                                {{eachCard}}
+                                <p>{{judgeRarity(eachCard)}}</p>
+                            </el-main>
+                        </el-container>
+                        <el-button @click= "GetTenCard() ; visible = true ; tenTries = true">再十連抽</el-button>
+                    </el-dialog>
+
                 </el-main>
             </el-container>
         </el-container>
@@ -64,17 +75,43 @@
             data: function() {
                 return {
                     visible: false,
-                    randomNum: this.createRandom()
+                    tenTries: true,
+                    card: 100,
+                    TenCard: [100,100,100,100,100,100,100,100,100,100],
                 }
             },
             methods: {
-                createRandom: function () {  
-                    this.randomNum = Math.floor(Math.random() * 1000 + 1);
-                }
+                createRandom() {  
+                     return Math.floor(Math.random() * 1000 + 1);
+                },
+                judgeRarity(odds){
+                    if (odds >=970)
+                        return '四星';
+                    else if (odds >=915)
+                        return '三星';
+                    else
+                        return '二星';
+                },
+                GetOneCard(){
+                    this.card = this.createRandom();
+                    console.log(this.card);
+                },
+                GetTenCard(){
+                    let newArr = [];
+                    for(let i=0;i<10;i++)
+                        newArr.push(this.createRandom());
+                    console.log(newArr);
+                    this.TenCard = newArr;
+                },
+                openNotify() {
+                    this.$notify({
+                        title: '突發新聞',
+                        message: '周杰倫失去了一切...',
+                        duration: 0
+                    });
+                },
             },
-            created: function() {
-                this.createRandom();
-            }
+
         })
     </script>
 </html>
