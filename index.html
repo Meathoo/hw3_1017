@@ -6,58 +6,165 @@
     <link rel="stylesheet" href="https://unpkg.com/element-ui/lib/theme-chalk/index.css">
     <style>
         .el-header, .el-footer {
-            background-color: #B3C0D1;
-            color: #333;
+            background-color: #409EFF;
+            color: rgb(255, 255, 255);
             text-align: center;
             line-height: 60px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, .12), 0 0 6px rgba(0, 0, 0, .04);
         }
         
         .el-aside {
-            background-color: #D3DCE6;
-            color: #333;
+            background-color: #D9ECFF;
+            color: black;
             text-align: center;
-            line-height: 1000px;
+            line-height: 10px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, .12), 0 0 6px rgba(0, 0, 0, .04);
         }
         
         .el-main {
-            background-color: #E9EEF3;
+            height: 680px;
+            background-color: #ECF5FF;
             color: #333;
             text-align: center;
-            line-height: 160px;
+            line-height: 40px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, .12), 0 0 6px rgba(0, 0, 0, .04);
         }
         body > .el-container {
             margin-bottom: 40px;
+        }
+        .icon{
+            font-size: 35px;
+            color: gray;
+            margin-top: 20px;
+            margin-bottom: 20px;
+            transition-duration: 0.5s;
+        }
+        .icon:hover{
+            font-size: 40px;
+            color: #409EFF;
+        }
+        .el-row {
+            margin-bottom: 10px;
+            &:last-child {
+                margin-bottom: 0;
+            }
+        }
+        .el-col {
+            border-radius: 4px;
+            color:white;
+        }
+        .row-bg{
+            background-color: #4986c3;
+        }
+        .grid-content {
+            border-radius: 4px;
+            min-height: auto;
+        }
+        .slider{
+            display: flex;
+            align-items: center;
+            margin-top: 0px;
+            margin-left: 12px;
+        }
+        .slider_block{
+            width:80%; 
+            margin-top:13px;
+        }
+        .star{
+            font-size:31px;
+            background: linear-gradient(to top, #03F1D5,#7f83dc, #FFBAF2 );
+            background: -webkit-linear-gradient(to top, #03F1D5, #8AC0F9, #FFBAF2);
+            background-clip: text;
+            -webkit-background-clip: text;
+            color: transparent;
         }
         </style>
     </head>
     <body>
     <div id="app">
-        <el-header>抽卡模擬</el-header>
+        <el-header><p>抽卡模擬</p></el-header>
         <el-container>
-            <el-aside width="100px">Aside</el-aside>
-            <el-container>
+            <el-aside width="60px">
+                <el-container direction="vertical">
+                    <i class="el-icon-s-home icon" @click="changePage(0)"></i>
+                    <p>Home</p>
+                    <i class="el-icon-tickets icon" @click="changePage(1)"></i>
+                    <p>Info</p>
+                </el-container>
+                
+            </el-aside>
+            <el-container v-show="page_switch==0">
                 <el-main>
-                    抽卡<br>
-                    <el-button plain @click="openNotify">周杰倫失去了一切...</el-button>
+                    <el-row>
+                        <el-col :span="24"><div class="grid-content row-bg">抽卡</div></el-col>
+                    </el-row>
+                    <template>
+                        <el-carousel height="300px" :interval="4000" type="card" height="200px">
+                            <el-carousel-item v-for="(img,index) in cardpool" :key="index">
+                                <img v-bind:src="img.url">
+                            </el-carousel-item>
+                        </el-carousel>
+                    </template>
                     <el-button @click="GetOneCard() ; visible = true ; tenTries = false">抽</el-button>
                     <el-button @click="GetTenCard() ; visible = true ; tenTries = true">十連抽</el-button>
                     <el-dialog v-if='tenTries == false' :visible.sync="visible" title="結果">
                         <el-main>
                             <p>{{card}}</p>
-                            <p>{{judgeRarity(card)}}</p>
+                            <p><i v-for="i in judgeRarity(card)" class="el-icon-star-on star"></i></p>
                         </el-main>
                         <el-button @click="GetOneCard() ; visible = true ; tenTries = false">再抽</el-button>
                     </el-dialog>
-                    <el-dialog v-if="tenTries == true" :visible.sync="visible" title="結果">
+                    <el-dialog v-if="tenTries == true" :visible.sync="visible" title="結果" >
                         <el-container>
                             <el-main v-for='eachCard in TenCard'>
                                 {{eachCard}}
-                                <p>{{judgeRarity(eachCard)}}</p>
+                                <p><i v-for="i in judgeRarity(eachCard)" class="el-icon-star-on star"></i></p>
                             </el-main>
                         </el-container>
                         <el-button @click= "GetTenCard() ; visible = true ; tenTries = true">再十連抽</el-button>
                     </el-dialog>
+                </el-main>
+            </el-container>
+            <el-container v-show="page_switch==1">
+                <el-main>
+                    <div>
+                        <el-row>
+                            <el-col :span="24"><div class="grid-content row-bg">情報</div></el-col>
+                        </el-row>
+                        <div>
+                            <el-table style="font-size: 18px; margin-left:25%; width: 800px;" size="medium" :data="tableData" >
+                                <el-table-column prop="rarity" label="稀有度" width="400px"></el-table-column>
+                                <el-table-column prop="probability" label="機率(%)" width="400px"></el-table-column>
+                            </el-table>
+                        </div>
+                        <el-row style="margin-top: 30px;">
+                            <el-col :span="24"><div class="grid-content row-bg">自訂</div></el-col>
+                        </el-row>
+                        <el-container style="margin-left: 10%;">
+                            <p><i v-for="i in 4" class="el-icon-star-on star"></i></p>
+                            <div class="slider_block">
+                                <el-slider class="slider" v-model="tableData[0].probability" :step="0.1" :marks="marks1"></el-slider>
+                            </div>
+                        </el-container>
+                        <el-container style="margin-left: 10%;">
+                            <p style="margin-right:30px;"><i v-for="i in 3" class="el-icon-star-on star"></i></p>
+                            <div class="slider_block">
+                                <el-slider class="slider" v-model="tableData[1].probability" :step="0.1" :marks="marks2"></el-slider>                            
+                            </div>
+                        </el-container>
+                        <el-container style="margin-left: 10%;">
+                            <p style="margin-right:60px ;"><i v-for="i in 2" class="el-icon-star-on star"></i></p>
+                            <div class="slider_block">
+                                <el-slider class="slider" v-model="tableData[2].probability" :step="0.1" :marks="marks3"></el-slider>                        
+                            </div>
+                        </el-container>
 
+                        <el-button size="mini" type="primary" @click="setdefault">還原預設</el-button>
+                        <el-button size="mini" type="success" @click="openNotify">自訂</el-button>
+                        <el-button size="mini" type="danger" @click="openNotify2">清除</el-button> 
+                    </div>
+                      
+                         
                 </el-main>
             </el-container>
         </el-container>
@@ -65,32 +172,55 @@
         
     </div>
     </body>
-    <!-- import Vue before Element -->
+    <!-- Vue  -->
     <script src="https://unpkg.com/vue@2/dist/vue.js"></script>
-    <!-- import JavaScript -->
+    <!-- element-ui -->
     <script src="https://unpkg.com/element-ui/lib/index.js"></script>
     <script>
         new Vue({
             el: '#app',
             data: function() {
                 return {
+                    page_switch:0,
                     visible: false,
                     tenTries: true,
                     card: 100,
                     TenCard: [100,100,100,100,100,100,100,100,100,100],
+                    tableData: [{
+                        rarity: '四星',
+                        probability: 3,
+                    }, {
+                        rarity: '三星',
+                        probability: 8.5,
+                    }, {
+                        rarity: '二星',
+                        probability: 88.5,
+                    }],
+                    marks1: {3: '3%'},
+                    marks2: {8.5: '8.5%'},
+                    marks3: {88.5: '88.5%',},
+                    cardpool:[
+                        {url:"https://img.onl/aAJOiy"},
+                        {url:"http://to-a.ru/TmjVfG/img1"},
+                        {url:"http://sngk.net/8xQ5jC/img1"},
+                    ]
                 }
             },
             methods: {
+                changePage(page){
+                    this.page_switch = page;
+                    console.log(page);
+                },
                 createRandom() {  
                      return Math.floor(Math.random() * 1000 + 1);
                 },
                 judgeRarity(odds){
-                    if (odds >=970)
-                        return '四星';
-                    else if (odds >=915)
-                        return '三星';
+                    if (odds >=(1000-this.tableData[0].probability*10))
+                        return 4;
+                    else if (odds >=1000-this.tableData[1].probability*10)
+                        return 3;
                     else
-                        return '二星';
+                        return 2;
                 },
                 GetOneCard(){
                     this.card = this.createRandom();
@@ -105,13 +235,25 @@
                 },
                 openNotify() {
                     this.$notify({
+                        type: 'info',
                         title: '突發新聞',
                         message: '周杰倫失去了一切...',
-                        duration: 0
                     });
                 },
-            },
-
-        })
+                openNotify2() {
+                    this.$notify({
+                        type: 'warning',
+                        title: '在您的設備上探測到了(4)個病毒',
+                        message: '我們探測到您的設備已經被病毒感染。若不採取措施，病毒會很快損壞您的資料和照片',
+                        position: 'bottom-right'
+                    });
+                },
+                setdefault(){
+                    this.tableData[0].probability=3;
+                    this.tableData[1].probability=8.5;
+                    this.tableData[2].probability=88.5;
+                }
+            }
+        });
     </script>
 </html>
