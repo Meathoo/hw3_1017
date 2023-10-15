@@ -20,7 +20,6 @@
             line-height: 10px;
             box-shadow: 0 2px 4px rgba(0, 0, 0, .12), 0 0 6px rgba(0, 0, 0, .04);
         }
-        
         .el-main {
             height: 680px;
             background-color: #ECF5FF;
@@ -28,6 +27,9 @@
             text-align: center;
             line-height: 40px;
             box-shadow: 0 2px 4px rgba(0, 0, 0, .12), 0 0 6px rgba(0, 0, 0, .04);
+        }
+        .el-dialog .el-main {
+            height: 300px;
         }
         body > .el-container {
             margin-bottom: 40px;
@@ -78,7 +80,8 @@
             -webkit-background-clip: text;
             color: transparent;
         }
-        </style>
+
+    </style>
     </head>
     <body>
     <div id="app">
@@ -90,6 +93,10 @@
                     <p>Home</p>
                     <i class="el-icon-tickets icon" @click="changePage(1)"></i>
                     <p>Info</p>
+                    <i class="el-icon-news icon" @click="openNotify"></i>
+                    <p>News</p>
+                    <i class="el-icon-warning icon" @click="openNotify2"></i>
+                    <p>Warning</p>
                 </el-container>
                 
             </el-aside>
@@ -105,23 +112,23 @@
                             </el-carousel-item>
                         </el-carousel>
                     </template>
-                    <el-button @click="GetOneCard() ; visible = true ; tenTries = false">抽</el-button>
-                    <el-button @click="GetTenCard() ; visible = true ; tenTries = true">十連抽</el-button>
-                    <el-dialog v-if='tenTries == false' :visible.sync="visible" title="結果">
+                    
+                    <el-button @click="detect(false) ; visible = true" >抽</el-button>
+                    <el-button @click="detect(true) ; visible = true">十連抽</el-button>
+                    <el-dialog v-if='ErrorOneTen == 1' :visible.sync="visible" title="結果">
                         <el-main>
-                            <p>{{card}}</p>
-                            <p><i v-for="i in judgeRarity(card)" class="el-icon-star-on star"></i></p>
+                            <p style="margin-top:100px;"><i v-for="i in judgeRarity(card)" class="el-icon-star-on star"></i></p>
                         </el-main>
-                        <el-button @click="GetOneCard() ; visible = true ; tenTries = false">再抽</el-button>
+                        <div style="margin-top: 20px;"><el-button @click=" detect(false) ;visible = true">再抽</el-button></div>
+                        
                     </el-dialog>
-                    <el-dialog v-if="tenTries == true" :visible.sync="visible" title="結果" >
+                    <el-dialog v-if="ErrorOneTen == 2" :visible.sync="visible" title="結果" >
                         <el-container>
                             <el-main v-for='eachCard in TenCard'>
-                                {{eachCard}}
-                                <p><i v-for="i in judgeRarity(eachCard)" class="el-icon-star-on star"></i></p>
+                                    <p><i v-for="i in judgeRarity(eachCard)" class="el-icon-star-on star"></i></p>
                             </el-main>
                         </el-container>
-                        <el-button @click= "GetTenCard() ; visible = true ; tenTries = true">再十連抽</el-button>
+                        <el-button @click= "detect(true) ; visible = true">再十連抽</el-button>
                     </el-dialog>
                 </el-main>
             </el-container>
@@ -160,15 +167,15 @@
                         </el-container>
 
                         <el-button size="mini" type="primary" @click="setdefault">還原預設</el-button>
-                        <el-button size="mini" type="success" @click="openNotify">自訂</el-button>
-                        <el-button size="mini" type="danger" @click="openNotify2">清除</el-button> 
                     </div>
                       
                          
                 </el-main>
             </el-container>
         </el-container>
-        <el-footer>Footer</el-footer>
+        <el-footer>
+                Capybara8239
+        </el-footer>
         
     </div>
     </body>
@@ -183,7 +190,7 @@
                 return {
                     page_switch:0,
                     visible: false,
-                    tenTries: true,
+                    ErrorOneTen: 1,
                     card: 100,
                     TenCard: [100,100,100,100,100,100,100,100,100,100],
                     tableData: [{
@@ -203,7 +210,7 @@
                         {url:"https://img.onl/aAJOiy"},
                         {url:"http://to-a.ru/TmjVfG/img1"},
                         {url:"http://sngk.net/8xQ5jC/img1"},
-                    ]
+                    ],
                 }
             },
             methods: {
@@ -252,7 +259,23 @@
                     this.tableData[0].probability=3;
                     this.tableData[1].probability=8.5;
                     this.tableData[2].probability=88.5;
-                }
+                },
+                detect(OneTen){
+                    if( this.tableData[0].probability*10+this.tableData[1].probability*10+this.tableData[2].probability*10 != 1000){
+                        alert("機率設定有誤，請處理");
+                        this.ErrorOneTen=0;
+                    }
+                    else{
+                        if(OneTen==false){
+                            this.GetOneCard();
+                            this.ErrorOneTen=1;
+                        }
+                        else{
+                            this.GetTenCard();
+                            this.ErrorOneTen=2;
+                        }
+                    }
+                },
             }
         });
     </script>
